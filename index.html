@@ -679,6 +679,7 @@ let state = {
 };
 
 let currentUser = null;
+let authInitialized = false;
 
 function resetState() {
   state.maxBlocks = 7;
@@ -1184,9 +1185,17 @@ function init() {
 
   // Auth state — fires on page load and on every sign-in/sign-out
   auth.onAuthStateChanged(async (user) => {
+    const signingOut = authInitialized && !user && currentUser;
     currentUser = user;
-    resetState();
-    await loadState();
+    authInitialized = true;
+
+    if (signingOut) {
+      // Keep current in-memory state; persist it to localStorage so it survives the session
+      await saveState();
+    } else {
+      resetState();
+      await loadState();
+    }
 
     // Sync input values to loaded state
     maxBlocksEl.value = state.maxBlocks;
