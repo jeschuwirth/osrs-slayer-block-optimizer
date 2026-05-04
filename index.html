@@ -356,12 +356,40 @@ input[type="checkbox"] {
 .wiki-table a { text-decoration: none; color: var(--link-color); font-weight: 500; }
 .wiki-table a:hover { text-decoration: underline; }
 
+/* ---- AUTH BAR ---- */
+#auth-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 10px;
+  font-size: 0.83rem;
+  color: #555;
+}
+#auth-user-name {
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--background-link-color);
+  font-weight: 500;
+}
+#btn-signin, #btn-signout {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+}
+
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="page-wrap">
 
   <h1>⚔ OSRS Slayer Block List Optimizer</h1>
+  <div id="auth-bar">
+    <span id="auth-user-name"></span>
+    <button id="btn-signin" onclick="signIn()">Sign in with Google</button>
+    <button id="btn-signout" onclick="signOut()" style="display:none">Sign out</button>
+  </div>
   <p class="subtitle">Optimize your block list to minimize unwanted slayer tasks. Data: OSRS Wiki (May 2026).</p>
 
   <!-- GLOBAL SETTINGS -->
@@ -446,6 +474,24 @@ input[type="checkbox"] {
 </div>
 
 <script>
+// ========================
+// FIREBASE CONFIG
+// ========================
+// Paste your Firebase project config here (Firebase Console → Project Settings → Your apps)
+const firebaseConfig = {
+  apiKey: "AIzaSyC3UVptKzFiNtP5k6U3Q1bIDB7Q7RstAOI",
+  authDomain: "osrs-slayer-block-optimizer.firebaseapp.com",
+  projectId: "osrs-slayer-block-optimizer",
+  storageBucket: "osrs-slayer-block-optimizer.firebasestorage.app",
+  messagingSenderId: "219131168011",
+  appId: "1:219131168011:web:0e6d928d55af9180fcce0e",
+  measurementId: "G-3JGGK4FWQG"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 // ========================
 // DATA
 // ========================
@@ -621,6 +667,29 @@ let state = {
   fullSort: { col: 'weight', dir: 'desc' },
 };
 
+let currentUser = null;
+
+function resetState() {
+  state.maxBlocks = 7;
+  state.slayerLevel = 99;
+  state.nieveElite = false;
+  state.ratings = {};
+  state.unlocked = {};
+  state.hardBlocks = {};
+  state.notes = {};
+  state.fullSort = { col: 'weight', dir: 'desc' };
+}
+
+function applyState(parsed) {
+  if (parsed.ratings)    state.ratings    = parsed.ratings;
+  if (parsed.unlocked)   state.unlocked   = parsed.unlocked;
+  if (parsed.hardBlocks) state.hardBlocks = parsed.hardBlocks;
+  if (parsed.notes)      state.notes      = parsed.notes;
+  if (parsed.maxBlocks   !== undefined) state.maxBlocks   = parsed.maxBlocks;
+  if (parsed.slayerLevel !== undefined) state.slayerLevel = parsed.slayerLevel;
+  if (parsed.nieveElite  !== undefined) state.nieveElite  = parsed.nieveElite;
+}
+
 function getRating(master, monsterId) {
   return (state.ratings[master] && state.ratings[master][monsterId] !== undefined)
     ? state.ratings[master][monsterId] : 3;
@@ -664,26 +733,37 @@ function countHardBlocks(master) {
   return Object.values(state.hardBlocks[master]).filter(Boolean).length;
 }
 
-function loadState() {
+async function loadState() {
   try {
-    const saved = localStorage.getItem('osrs_slayer_optimizer_v3');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.ratings)    state.ratings    = parsed.ratings;
-      if (parsed.unlocked)   state.unlocked   = parsed.unlocked;
-      if (parsed.hardBlocks) state.hardBlocks = parsed.hardBlocks;
-      if (parsed.notes)      state.notes      = parsed.notes;
-      if (parsed.maxBlocks   !== undefined) state.maxBlocks   = parsed.maxBlocks;
-      if (parsed.slayerLevel !== undefined) state.slayerLevel = parsed.slayerLevel;
-      if (parsed.nieveElite  !== undefined) state.nieveElite  = parsed.nieveElite;
+    if (currentUser) {
+      const docRef = db.collection('users').doc(currentUser.uid);
+      const snap = await docRef.get();
+      if (snap.exists) {
+        applyState(snap.data());
+        return;
+      }
+      // First login: migrate any existing localStorage data to Firestore
+      const local = localStorage.getItem('osrs_slayer_optimizer_v3');
+      if (local) {
+        applyState(JSON.parse(local));
+        await docRef.set(JSON.parse(JSON.stringify(state)));
+        localStorage.removeItem('osrs_slayer_optimizer_v3');
+      }
+    } else {
+      const saved = localStorage.getItem('osrs_slayer_optimizer_v3');
+      if (saved) applyState(JSON.parse(saved));
     }
-  } catch(e) {}
+  } catch(e) { console.error('loadState error:', e); }
 }
 
-function saveState() {
+async function saveState() {
   try {
-    localStorage.setItem('osrs_slayer_optimizer_v3', JSON.stringify(state));
-  } catch(e) {}
+    if (currentUser) {
+      await db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify(state)));
+    } else {
+      localStorage.setItem('osrs_slayer_optimizer_v3', JSON.stringify(state));
+    }
+  } catch(e) { console.error('saveState error:', e); }
 }
 
 // (Monster Ratings tab removed — ratings now live inline in the Full Task List per master)
@@ -1019,16 +1099,27 @@ function buildSkipAnalysis(master, assignable, blockedIds) {
 }
 
 // ========================
+// AUTH
+// ========================
+async function signIn() {
+  try {
+    await auth.signInWithPopup(googleProvider);
+  } catch(e) { console.error('Sign-in error:', e); }
+}
+
+async function signOut() {
+  try {
+    await auth.signOut();
+  } catch(e) { console.error('Sign-out error:', e); }
+}
+
+// ========================
 // INIT
 // ========================
 function init() {
-  loadState();
-
   // Settings
   const maxBlocksEl = document.getElementById('max-blocks');
   const slayerLvlEl = document.getElementById('slayer-level');
-  maxBlocksEl.value = state.maxBlocks;
-  slayerLvlEl.value = state.slayerLevel;
 
   maxBlocksEl.addEventListener('change', () => {
     state.maxBlocks = Math.min(7, Math.max(1, parseInt(maxBlocksEl.value) || 7));
@@ -1056,14 +1147,30 @@ function init() {
 
   // Nieve diary toggle
   const nieveEl = document.getElementById('nieve-diary-cb');
-  nieveEl.checked = state.nieveElite;
   nieveEl.addEventListener('change', () => {
     state.nieveElite = nieveEl.checked;
     saveState();
     buildRecommender();
   });
 
-  buildRecommender();
+  // Auth state — fires on page load and on every sign-in/sign-out
+  auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    resetState();
+    await loadState();
+
+    // Sync input values to loaded state
+    maxBlocksEl.value = state.maxBlocks;
+    slayerLvlEl.value = state.slayerLevel;
+    nieveEl.checked = state.nieveElite;
+
+    // Update auth bar
+    document.getElementById('btn-signin').style.display = user ? 'none' : '';
+    document.getElementById('btn-signout').style.display = user ? '' : 'none';
+    document.getElementById('auth-user-name').textContent = user ? `Signed in as ${user.displayName}` : '';
+
+    buildRecommender();
+  });
 }
 
 document.addEventListener('DOMContentLoaded', init);
