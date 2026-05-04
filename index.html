@@ -128,38 +128,7 @@ button {
   letter-spacing: 0.02em;
   transition: background 0.15s;
 }
-button:hover { background: var(--button-light); }
-
-/* ---- TABS ---- */
-.tab-row {
-  display: flex;
-  gap: 0;
-  border-bottom: 2px solid var(--body-border);
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.tab-btn {
-  background: var(--body-light);
-  border: 1px solid var(--body-border);
-  border-bottom: none;
-  color: var(--background-link-color);
-  font-family: 'PT Serif', serif;
-  font-size: 0.88rem;
-  padding: 6px 14px;
-  cursor: pointer;
-  margin-right: 2px;
-  margin-bottom: -2px;
-  border-radius: 2px 2px 0 0;
-  transition: background 0.12s;
-}
-.tab-btn:hover { background: var(--body-mid); }
-.tab-btn.active {
-  background: var(--body-main);
-  border-bottom: 2px solid var(--body-main);
-  font-weight: 700;
-  z-index: 1;
-}
+button:not(.rating-btn):hover { background: var(--button-light); }
 
 /* ---- TABLES ---- */
 .wiki-table {
@@ -207,12 +176,35 @@ button:hover { background: var(--button-light); }
 
 .wiki-table tr.disabled-row td { opacity: 0.5; }
 
-/* ---- RATING SELECT ---- */
-.rating-select {
-  width: 110px;
-  font-size: 0.82rem;
-  padding: 3px 6px;
+/* ---- RATING BUTTON GROUP ---- */
+.rating-group {
+  display: inline-flex;
+  gap: 0;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid var(--body-border);
 }
+.rating-btn {
+  border: none;
+  border-right: 1px solid rgba(0,0,0,0.18);
+  background: var(--body-light);
+  color: var(--background-text-color);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.73rem;
+  font-weight: 500;
+  padding: 3px 7px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.rating-btn:last-child { border-right: none; }
+.rating-btn:not(.active):hover { background: var(--body-mid); }
+.rating-btn.active { color: #fff; font-weight: 700; }
+.rating-btn.active.r1 { background: var(--hate-color); }
+.rating-btn.active.r2 { background: var(--dislike-color); }
+.rating-btn.active.r3 { background: var(--neutral-color); }
+.rating-btn.active.r4 { background: var(--love-color); }
 
 /* ---- BADGES ---- */
 .badge {
@@ -231,37 +223,6 @@ button:hover { background: var(--button-light); }
 
 .badge-yes { background: var(--love-color); }
 .badge-no  { background: #555; }
-
-/* ---- RECOMMENDED BLOCKS ---- */
-.rec-block-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.rec-item {
-  background: var(--body-light);
-  border: 1px solid var(--body-border);
-  padding: 5px 10px;
-  border-radius: 2px;
-  font-size: 0.86rem;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.rec-num {
-  font-family: 'PT Serif', serif;
-  font-weight: 700;
-  color: var(--background-link-color);
-  min-width: 18px;
-}
-
-.rec-weight {
-  color: #666;
-  font-size: 0.78rem;
-}
 
 /* ---- SKIP ANALYSIS ---- */
 .skip-grid {
@@ -328,22 +289,6 @@ button:hover { background: var(--button-light); }
   flex-wrap: wrap;
 }
 
-#monster-search {
-  background: var(--body-light);
-  border: 1px solid var(--body-border);
-  color: var(--background-text-color);
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.9rem;
-  padding: 5px 8px;
-  border-radius: 2px;
-  width: 200px;
-}
-
-.filter-select {
-  width: auto;
-  min-width: 130px;
-}
-
 /* ---- SCROLLABLE TABLE ---- */
 .table-scroll {
   overflow-x: auto;
@@ -382,9 +327,35 @@ input[type="checkbox"] {
   border-radius: 2px;
 }
 
-#page-tabs { margin-bottom: 0; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+/* ---- NOTES INPUT ---- */
+.notes-input {
+  display: block;
+  width: 100%;
+  min-width: 240px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--body-border);
+  color: var(--background-text-color);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.82rem;
+  padding: 2px 2px 3px;
+  resize: none;
+  line-height: 1.45;
+  min-height: 42px;
+  overflow: hidden;
+}
+.notes-input:focus {
+  outline: none;
+  border-bottom: 1px solid var(--link-color);
+  background: rgba(0,0,0,0.04);
+}
+.notes-input::placeholder { color: #999; font-style: italic; }
+
+.badge-hard { background: #6b2fa0; }
+
+.wiki-table a { text-decoration: none; color: var(--link-color); font-weight: 500; }
+.wiki-table a:hover { text-decoration: underline; }
+
 </style>
 </head>
 <body>
@@ -399,7 +370,7 @@ input[type="checkbox"] {
     <div class="settings-row">
       <div class="field-group">
         <label for="max-blocks">Max Blocks (N)</label>
-        <input type="number" id="max-blocks" min="1" max="10" value="6">
+        <input type="number" id="max-blocks" min="1" max="7" value="7">
       </div>
       <div class="field-group">
         <label for="slayer-level">My Slayer Level</label>
@@ -408,50 +379,10 @@ input[type="checkbox"] {
     </div>
   </div>
 
-  <!-- PAGE TABS -->
-  <div class="tab-row" id="page-tabs">
-    <button class="tab-btn active" data-tab="ratings">Monster Ratings</button>
-    <button class="tab-btn" data-tab="recommender">Block Recommender</button>
-  </div>
+  <!-- PAGE TABS removed — single view now -->
 
-  <!-- TAB: MONSTER RATINGS -->
-  <div class="tab-content active" id="tab-ratings">
-    <div class="panel">
-      <div class="panel-title">Monster Ratings</div>
-      <div class="search-row">
-        <input type="text" id="monster-search" placeholder="Search monsters…">
-        <div class="field-group" style="flex-direction:row;align-items:center;gap:6px;">
-          <label style="font-size:0.82rem;color:#555;">Filter rating:</label>
-          <select id="filter-rating" class="filter-select">
-            <option value="all">All ratings</option>
-            <option value="1">1 – Hate</option>
-            <option value="2">2 – Dislike</option>
-            <option value="3">3 – Neutral</option>
-            <option value="4">4 – Love</option>
-          </select>
-        </div>
-        <button id="reset-ratings-btn">Reset All Ratings</button>
-      </div>
-      <div class="table-scroll">
-        <table class="wiki-table" id="ratings-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Monster</th>
-              <th>Slayer Lvl</th>
-              <th>Unlocked</th>
-              <th>Rating</th>
-              <th>Label</th>
-            </tr>
-          </thead>
-          <tbody id="ratings-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB: RECOMMENDER -->
-  <div class="tab-content" id="tab-recommender">
+  <!-- RECOMMENDER (now the only view) -->
+  <div id="tab-recommender">
     <div class="panel">
       <div class="panel-title">Slayer Master Block Recommender</div>
       <div class="settings-row" style="margin-bottom:14px;">
@@ -489,7 +420,9 @@ input[type="checkbox"] {
       <div id="skip-analysis-container"></div>
 
       <!-- FULL TASK LIST -->
-      <div class="page-section-title" style="margin-top:16px;">Full Task List</div>
+      <div class="page-section-title" style="margin-top:16px;">Full Task List
+        <button id="reset-master-ratings-btn" style="font-size:0.75rem;padding:3px 10px;margin-left:12px;vertical-align:middle;">Reset ratings for this master</button>
+      </div>
       <div class="table-scroll">
         <table class="wiki-table" id="full-task-table">
           <thead>
@@ -497,8 +430,11 @@ input[type="checkbox"] {
               <th class="sortable" data-table="full" data-col="name">Monster<span class="sort-arrow">↕</span></th>
               <th class="sortable sort-desc" data-table="full" data-col="weight">Weight<span class="sort-arrow">▼</span></th>
               <th class="sortable" data-table="full" data-col="chance">Chance (%)<span class="sort-arrow">↕</span></th>
+              <th>Unlocked</th>
               <th class="sortable" data-table="full" data-col="rating">Rating<span class="sort-arrow">↕</span></th>
-              <th class="sortable" data-table="full" data-col="blocked">Blocked?<span class="sort-arrow">↕</span></th>
+              <th class="sortable" data-table="full" data-col="hardblock">Hard Block<span class="sort-arrow">↕</span></th>
+              <th class="sortable" data-table="full" data-col="blocked">In Block List<span class="sort-arrow">↕</span></th>
+              <th>Notes</th>
             </tr>
           </thead>
           <tbody id="full-task-tbody"></tbody>
@@ -519,24 +455,24 @@ const CSV = `ID,Monster,Slayer lvl,Nieve,Duradel,Konar quo Maten,Mazchna,Turael,
 3,Ankou,1,5,5,5,0,0,0,9,8,0
 4,Aquanites,78,5,5,0,0,0,0,0,0,0
 5,Araxytes,92,8,10,0,0,0,0,0,0,0
-6,Aviansies,1,6,8,0,0,0,0,0,0,9
+6,Aviansies,1,6,8,6,0,0,0,0,0,9
 7,Bandits,1,0,0,0,0,0,0,8,0,0
 8,Banshees,15,0,0,0,8,8,8,0,0,0
-9,Basilisks,40,6,7,6,0,0,0,0,8,7
+9,Basilisks,40,6,7,5,0,0,0,0,8,7
 10,Bats,1,0,0,0,7,7,7,0,0,0
 11,Bears,1,0,0,0,6,7,7,0,0,0
 12,Birds,1,0,0,0,0,6,6,0,0,0
-13,Black demons,1,9,8,8,0,0,0,9,0,10
-14,Black dragons,1,6,9,7,0,0,0,0,0,0
+13,Black demons,1,9,8,9,0,0,0,9,0,10
+14,Black dragons,1,6,9,6,0,0,0,0,0,0
 15,Black Knights,1,0,0,0,0,0,0,7,0,0
-16,Bloodvelds,50,9,8,8,0,0,0,9,8,8
-17,Blue dragons,1,4,4,5,0,0,0,0,7,8
-18,Brine rats,47,3,0,0,0,0,0,0,7,7
+16,Bloodvelds,50,9,8,9,0,0,0,9,8,8
+17,Blue dragons,1,4,4,4,0,0,0,0,7,8
+18,Brine rats,47,3,0,2,0,0,0,0,7,7
 19,Catablepon,1,0,0,0,8,0,0,0,0,0
 20,Cave bugs,7,0,0,0,8,8,8,0,0,0
 21,Cave crawlers,10,0,0,0,8,8,8,0,0,0
 22,Cave horrors,58,5,4,0,0,0,0,0,0,10
-23,Cave kraken,87,6,9,8,0,0,0,0,0,12
+23,Cave kraken,87,6,9,9,0,0,0,0,0,12
 24,Cave slimes,17,0,0,0,8,8,8,0,0,0
 25,Chaos druids,1,0,0,0,0,0,0,9,0,0
 26,Cockatrices,25,0,0,0,8,0,0,0,8,0
@@ -546,21 +482,21 @@ const CSV = `ID,Monster,Slayer lvl,Nieve,Duradel,Konar quo Maten,Mazchna,Turael,
 30,Crocodiles,1,0,0,0,0,0,0,0,6,0
 31,Custodian stalkers,54,8,0,0,0,0,0,0,0,11
 32,Dagannoth,1,8,9,8,0,0,0,0,7,11
-33,Dark beasts,90,5,11,0,0,0,0,0,0,0
+33,Dark beasts,90,5,11,5,0,0,0,0,0,0
 34,Dark warriors,1,0,0,0,0,0,0,8,0,0
 35,Dogs,1,0,0,0,7,7,7,0,0,0
-36,Drakes,84,7,8,9,0,0,0,0,0,0
+36,Drakes,84,7,8,10,0,0,0,0,0,0
 37,Dust devils,65,6,5,6,0,0,0,9,8,9
 38,Dwarves,1,0,0,0,0,7,7,0,0,0
 39,Earth Warriors,1,0,0,0,0,0,0,6,0,0
 40,Elves,1,4,4,0,0,0,0,0,7,8
 41,Ent,1,0,0,0,0,0,0,7,0,0
 42,Fever spiders,42,0,0,0,0,0,0,0,7,7
-43,Fire giants,1,9,7,8,0,0,0,0,7,12
+43,Fire giants,1,9,7,9,0,0,0,0,7,12
 44,Flesh Crawlers,1,0,0,0,7,0,0,0,0,0
 45,Fossil Island Wyverns,66,5,7,5,0,0,0,0,0,7
 46,Frost dragons,1,5,5,0,0,0,0,0,0,0
-47,Gargoyles,75,6,8,7,0,0,0,0,5,11
+47,Gargoyles,75,6,8,6,0,0,0,0,5,11
 48,Ghosts,1,0,0,0,7,7,7,0,0,0
 49,Ghouls,1,0,0,0,7,0,0,0,7,0
 50,Goblins,1,0,0,0,0,7,7,0,0,0
@@ -568,39 +504,39 @@ const CSV = `ID,Monster,Slayer lvl,Nieve,Duradel,Konar quo Maten,Mazchna,Turael,
 52,Green dragons,1,0,0,0,0,0,0,8,0,0
 53,Gryphons,51,7,7,0,0,0,0,0,10,10
 54,Harpie bug swarms,33,0,0,0,0,0,0,0,8,0
-55,Hellhounds,1,8,10,10,0,0,0,9,7,9
+55,Hellhounds,1,8,10,8,0,0,0,9,7,9
 56,Hill Giant,1,0,0,0,7,0,0,0,7,0
 57,Hobgoblins,1,0,0,0,7,0,0,0,7,0
-58,Hydras,95,0,0,9,0,0,0,0,0,0
+58,Hydras,95,0,0,10,0,0,0,0,0,0
 59,Ice giants,1,0,0,0,0,0,0,7,7,0
 60,Ice warriors,1,0,0,0,7,0,0,7,7,0
 61,Icefiends,1,0,0,0,0,0,8,0,0,0
 62,Infernal Mages,45,0,0,0,0,0,0,0,8,0
-63,Jellies,52,0,0,0,0,0,0,9,8,10
+63,Jellies,52,0,0,6,0,0,0,9,8,10
 64,Jungle horrors,1,0,0,0,0,0,0,0,8,10
-65,Kalphite,1,9,9,8,6,0,6,0,7,11
+65,Kalphite,1,9,9,9,6,0,6,0,7,11
 66,Killerwatts,37,0,0,0,6,0,0,0,0,0
-67,Kurasks,70,3,4,0,0,0,0,0,7,12
+67,Kurasks,70,3,4,3,0,0,0,0,7,12
 68,Lava dragons,1,0,0,0,0,0,0,7,0,0
 69,Lesser demons,1,0,0,0,0,0,0,0,7,9
-70,Lesser Naguas,1,0,0,0,0,0,0,0,0,4
-71,Lizardmen,1,8,10,10,0,0,0,0,0,9
+70,Lesser Naguas,1,0,0,2,0,0,0,0,0,4
+71,Lizardmen,1,8,10,8,0,0,0,0,0,9
 72,Lizards,22,0,0,0,8,0,8,0,0,0
 73,Magic axes,1,0,0,0,0,0,0,7,0,0
 74,Mammoth,1,0,0,0,0,0,0,5,0,0
-75,Metal dragons,1,12,14,8,0,0,0,0,0,0
+75,Metal dragons,1,12,14,15,0,0,0,0,0,0
 76,Minotaurs,1,0,0,0,0,0,7,0,0,0
 77,Mogres,32,0,0,0,8,0,0,0,7,0
 78,Molanisks,39,0,0,0,0,0,0,0,7,0
 79,Monkeys,1,0,0,0,0,0,6,0,0,0
 80,Moss giants,1,0,0,0,0,0,0,0,7,0
-81,Nechryael,80,7,9,8,0,0,0,9,5,0
+81,Nechryael,80,7,9,7,0,0,0,9,5,0
 82,Ogres,1,0,0,0,0,0,0,0,7,0
 83,Otherworldly beings,1,0,0,0,0,0,0,0,8,0
 84,Pirate,1,0,0,0,0,0,0,7,0,0
 85,Pyrefiends,30,0,0,0,8,0,0,0,8,0
 86,Rats,1,0,0,0,0,0,7,0,0,0
-87,Red dragons,1,5,8,6,0,0,0,0,0,0
+87,Red dragons,1,5,8,5,0,0,0,0,0,0
 88,Revenants,1,0,0,0,0,0,0,8,0,0
 89,Rockslugs,20,0,0,0,8,0,0,0,0,0
 90,Rogues,1,0,0,0,0,0,0,7,0,0
@@ -609,26 +545,26 @@ const CSV = `ID,Monster,Slayer lvl,Nieve,Duradel,Konar quo Maten,Mazchna,Turael,
 93,Sea snakes,1,0,0,0,0,0,0,0,6,0
 94,Shades,1,0,0,0,8,0,0,0,8,0
 95,Shadow warriors,1,0,0,0,0,0,0,0,8,0
-96,Skeletal Wyverns,72,5,7,6,0,0,0,0,0,0
+96,Skeletal Wyverns,72,5,7,5,0,0,0,0,0,0
 97,Skeletons,1,0,0,0,7,0,7,0,0,0
-98,Smoke devils,93,7,9,8,0,0,0,0,0,0
+98,Smoke devils,93,7,9,7,0,0,0,0,0,0
 99,Sourhogs,1,0,0,0,0,0,6,0,0,0
 100,Spiders,1,0,0,0,0,0,0,0,0,0
 101,Spiritual creatures,1,6,7,0,0,0,0,9,8,0
 102,Suqahs,1,8,8,0,0,0,0,0,0,0
 103,Terror dogs,40,0,0,0,0,0,0,0,6,0
-104,Trolls,1,6,6,7,0,0,0,0,7,0
-105,Turoths,55,3,0,0,0,0,0,0,8,0
+104,Trolls,1,6,6,6,0,0,0,0,7,0
+105,Turoths,55,3,0,3,0,0,0,0,8,0
 106,TzHaar,1,10,10,10,0,0,0,0,0,0
-107,Vampyres,1,6,8,0,6,0,0,0,7,0
+107,Vampyres,1,6,8,4,6,0,0,0,7,0
 108,Wall beasts,35,0,0,0,7,0,0,0,0,0
-109,Warped creatures,56,6,8,0,0,0,0,0,0,0
-110,Waterfiends,1,0,2,3,0,0,0,0,0,0
+109,Warped creatures,56,6,8,4,0,0,0,0,0,0
+110,Waterfiends,1,0,2,2,0,0,0,0,0,0
 111,Werewolves,1,0,0,0,0,0,0,0,7,0
 112,Wolves,1,0,0,0,7,0,0,0,0,0
-113,Wyrms,62,7,8,12,0,0,0,0,0,0
+113,Wyrms,62,7,8,10,0,0,0,0,0,0
 114,Zombies,1,0,0,0,7,0,0,0,0,0
-115,Zygomites,57,2,2,0,0,0,0,0,0,0`;
+115,Zygomites,57,2,2,2,0,0,0,0,0,0`;
 
 const MASTER_POINTS = {
   'Turael': 0, 'Spria': 0, 'Krystilia': 25, 'Mazchna': 6,
@@ -670,102 +606,119 @@ const { monsters, masters } = parseCSV(CSV);
 // ========================
 // STATE
 // ========================
+// ratings:    { master: { monsterId: 1-4 } }
+// unlocked:   { master: { monsterId: bool } }
+// hardBlocks: { master: { monsterId: bool } }
+// notes:      { master: { monsterId: string } }
 let state = {
-  maxBlocks: 6,
+  maxBlocks: 7,
   slayerLevel: 99,
   nieveElite: false,
-  ratings: {},     // id -> 1-4
-  unlocked: {},    // id -> bool
-  recSort: { col: 'rank', dir: 'asc' },
+  ratings: {},
+  unlocked: {},
+  hardBlocks: {},
+  notes: {},
   fullSort: { col: 'weight', dir: 'desc' },
 };
 
+function getRating(master, monsterId) {
+  return (state.ratings[master] && state.ratings[master][monsterId] !== undefined)
+    ? state.ratings[master][monsterId] : 3;
+}
+
+function getUnlocked(master, monsterId) {
+  return (state.unlocked[master] && state.unlocked[master][monsterId] !== undefined)
+    ? state.unlocked[master][monsterId] : true;
+}
+
+function getHardBlock(master, monsterId) {
+  return !!(state.hardBlocks[master] && state.hardBlocks[master][monsterId]);
+}
+
+function getNote(master, monsterId) {
+  return (state.notes[master] && state.notes[master][monsterId]) || '';
+}
+
+function setRating(master, monsterId, value) {
+  if (!state.ratings[master]) state.ratings[master] = {};
+  state.ratings[master][monsterId] = value;
+}
+
+function setUnlocked(master, monsterId, value) {
+  if (!state.unlocked[master]) state.unlocked[master] = {};
+  state.unlocked[master][monsterId] = value;
+}
+
+function setHardBlock(master, monsterId, value) {
+  if (!state.hardBlocks[master]) state.hardBlocks[master] = {};
+  state.hardBlocks[master][monsterId] = value;
+}
+
+function setNote(master, monsterId, value) {
+  if (!state.notes[master]) state.notes[master] = {};
+  state.notes[master][monsterId] = value || '';
+}
+
+function countHardBlocks(master) {
+  if (!state.hardBlocks[master]) return 0;
+  return Object.values(state.hardBlocks[master]).filter(Boolean).length;
+}
+
 function loadState() {
   try {
-    const saved = localStorage.getItem('osrs_slayer_optimizer_v1');
+    const saved = localStorage.getItem('osrs_slayer_optimizer_v3');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Merge carefully — don't overwrite sort objects from defaults with saved primitives
-      if (parsed.ratings) state.ratings = parsed.ratings;
-      if (parsed.unlocked) state.unlocked = parsed.unlocked;
-      if (parsed.maxBlocks !== undefined) state.maxBlocks = parsed.maxBlocks;
+      if (parsed.ratings)    state.ratings    = parsed.ratings;
+      if (parsed.unlocked)   state.unlocked   = parsed.unlocked;
+      if (parsed.hardBlocks) state.hardBlocks = parsed.hardBlocks;
+      if (parsed.notes)      state.notes      = parsed.notes;
+      if (parsed.maxBlocks   !== undefined) state.maxBlocks   = parsed.maxBlocks;
       if (parsed.slayerLevel !== undefined) state.slayerLevel = parsed.slayerLevel;
-      if (parsed.nieveElite !== undefined) state.nieveElite = parsed.nieveElite;
+      if (parsed.nieveElite  !== undefined) state.nieveElite  = parsed.nieveElite;
     }
   } catch(e) {}
-  // Defaults
-  monsters.forEach(m => {
-    if (state.ratings[m.id] === undefined) state.ratings[m.id] = 3;
-    if (state.unlocked[m.id] === undefined) state.unlocked[m.id] = true;
-  });
 }
 
 function saveState() {
   try {
-    localStorage.setItem('osrs_slayer_optimizer_v1', JSON.stringify(state));
+    localStorage.setItem('osrs_slayer_optimizer_v3', JSON.stringify(state));
   } catch(e) {}
 }
 
+// (Monster Ratings tab removed — ratings now live inline in the Full Task List per master)
+
 // ========================
-// RATINGS TABLE
+// WIKI URL HELPER
 // ========================
-function buildRatingsTable() {
-  const tbody = document.getElementById('ratings-tbody');
-  tbody.innerHTML = '';
+// Slayer task URL overrides — cases where the CSV name doesn't match the wiki's Slayer_task/ slug exactly.
+// All others use the CSV name directly (spaces → underscores).
+const SLAYER_TASK_OVERRIDES = {
+  // Wiki uses plural where CSV has singular
+  'Ankou':              'Ankous',
+  'Dagannoth':          'Dagannoths',
+  'Kalphite':           'Kalphites',
+  // Wiki uses singular where CSV has plural
+  'Suqahs':             'Suqah',
+  // Wiki uses lowercase where CSV has uppercase
+  'Hill Giant':         'Hill_giants',
+  // No dedicated Slayer_task/ page — link to monster article instead
+  'Otherworldly beings': null,
+};
+const MONSTER_PAGE_FALLBACKS = {
+  'Otherworldly beings': 'Otherworldly_being',
+};
 
-  const search = document.getElementById('monster-search').value.toLowerCase();
-  const filterRating = document.getElementById('filter-rating').value;
-  const myLevel = state.slayerLevel;
-
-  monsters.forEach(m => {
-    if (search && !m.name.toLowerCase().includes(search)) return;
-    if (filterRating !== 'all' && state.ratings[m.id] != filterRating) return;
-
-    const meetsLevel = m.slayerLvl <= myLevel;
-    const rating = state.ratings[m.id];
-    const unlocked = state.unlocked[m.id];
-
-    const tr = document.createElement('tr');
-    if (!meetsLevel) tr.classList.add('disabled-row');
-
-    tr.innerHTML = `
-      <td>${m.id}</td>
-      <td>${m.name}</td>
-      <td><span class="slayer-lvl-pill">${m.slayerLvl}</span></td>
-      <td style="text-align:center;">
-        <input type="checkbox" data-id="${m.id}" class="unlock-cb" ${unlocked ? 'checked' : ''}>
-      </td>
-      <td>
-        <select class="rating-select" data-id="${m.id}">
-          <option value="1" ${rating==1?'selected':''}>1 – Hate</option>
-          <option value="2" ${rating==2?'selected':''}>2 – Dislike</option>
-          <option value="3" ${rating==3?'selected':''}>3 – Neutral</option>
-          <option value="4" ${rating==4?'selected':''}>4 – Love</option>
-        </select>
-      </td>
-      <td><span class="badge badge-${rating}">${RATING_LABELS[rating]}</span></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Events
-  tbody.querySelectorAll('.rating-select').forEach(sel => {
-    sel.addEventListener('change', e => {
-      const id = parseInt(e.target.dataset.id);
-      state.ratings[id] = parseInt(e.target.value);
-      saveState();
-      buildRatingsTable();
-      buildRecommender();
-    });
-  });
-  tbody.querySelectorAll('.unlock-cb').forEach(cb => {
-    cb.addEventListener('change', e => {
-      const id = parseInt(e.target.dataset.id);
-      state.unlocked[id] = e.target.checked;
-      saveState();
-      buildRecommender();
-    });
-  });
+function wikiUrl(monsterName) {
+  if (monsterName in SLAYER_TASK_OVERRIDES) {
+    const override = SLAYER_TASK_OVERRIDES[monsterName];
+    if (override === null) {
+      // Fall back to monster article
+      return `https://oldschool.runescape.wiki/w/${MONSTER_PAGE_FALLBACKS[monsterName]}`;
+    }
+    return `https://oldschool.runescape.wiki/w/Slayer_task/${override}`;
+  }
+  return `https://oldschool.runescape.wiki/w/Slayer_task/${monsterName.replace(/ /g, '_')}`;
 }
 
 // ========================
@@ -799,13 +752,12 @@ function sortRows(rows, col, dir, master) {
   return [...rows].sort((a, b) => {
     let va, vb;
     switch(col) {
-      case 'rank':     va = a._rank; vb = b._rank; break;
-      case 'name':     va = a.name.toLowerCase(); vb = b.name.toLowerCase(); break;
-      case 'slayerLvl': va = a.slayerLvl; vb = b.slayerLvl; break;
-      case 'weight':   va = master ? a.weights[master] : 0; vb = master ? b.weights[master] : 0; break;
-      case 'rating':   va = state.ratings[a.id]; vb = state.ratings[b.id]; break;
-      case 'chance':   va = a._chance ?? -1; vb = b._chance ?? -1; break;
-      case 'blocked':  va = a._blocked ? 1 : 0; vb = b._blocked ? 1 : 0; break;
+      case 'name':      va = a.name.toLowerCase(); vb = b.name.toLowerCase(); break;
+      case 'weight':    va = master ? a.weights[master] : 0; vb = master ? b.weights[master] : 0; break;
+      case 'rating':    va = getRating(master, a.id); vb = getRating(master, b.id); break;
+      case 'chance':    va = a._chance ?? -1; vb = b._chance ?? -1; break;
+      case 'blocked':   va = a._blocked ? 1 : 0; vb = b._blocked ? 1 : 0; break;
+      case 'hardblock': va = getHardBlock(master, a.id) ? 1 : 0; vb = getHardBlock(master, b.id) ? 1 : 0; break;
       default: va = 0; vb = 0;
     }
     if (typeof va === 'string') return mult * va.localeCompare(vb);
@@ -820,7 +772,7 @@ function getAssignableMonsters(master) {
   return monsters.filter(m =>
     m.weights[master] > 0 &&
     m.slayerLvl <= state.slayerLevel &&
-    state.unlocked[m.id]
+    getUnlocked(master, m.id)
   );
 }
 
@@ -836,23 +788,27 @@ function buildRecommender() {
   const assignable = getAssignableMonsters(master);
 
   // -- RECOMMENDED BLOCKS --
-  // Priority: ratings 1&2 (by weight desc), then 3, then 4
-  const byPriority = [...assignable].sort((a, b) => {
-    const ra = state.ratings[a.id];
-    const rb = state.ratings[b.id];
+  // Step 1: gather hard-blocked monsters that are assignable (they always take a slot)
+  const hardBlockedAssignable = assignable.filter(m => getHardBlock(master, m.id));
+  const hardBlockedIds = new Set(hardBlockedAssignable.map(m => m.id));
+
+  // Step 2: fill remaining slots with priority-sorted non-hard-blocked monsters
+  const remaining = assignable.filter(m => !hardBlockedIds.has(m.id));
+  const byPriority = [...remaining].sort((a, b) => {
+    const ra = getRating(master, a.id);
+    const rb = getRating(master, b.id);
     const ga = ra <= 2 ? 0 : ra === 3 ? 1 : 2;
     const gb = rb <= 2 ? 0 : rb === 3 ? 1 : 2;
     if (ga !== gb) return ga - gb;
-    return b.weights[master] - a.weights[master];
+    const weightDiff = b.weights[master] - a.weights[master];
+    if (weightDiff !== 0) return weightDiff;
+    return ra - rb; // same weight: lower rating (more hated) wins
   });
+  const autoFill = byPriority.slice(0, Math.max(0, N - hardBlockedAssignable.length));
 
-  const recommended = byPriority.slice(0, N);
+  const recommended = [...hardBlockedAssignable, ...autoFill];
   const blockedIds = new Set(recommended.map(m => m.id));
 
-  // Tag rank for sorting
-  recommended.forEach((m, i) => { m._rank = i + 1; });
-
-  // Apply sort & render rec table
   const renderRecTable = () => {
     const sorted = [...recommended].sort((a, b) => b.weights[master] - a.weights[master]);
     const tbody = document.getElementById('rec-blocks-tbody');
@@ -861,13 +817,17 @@ function buildRecommender() {
       tbody.innerHTML = '<tr><td colspan="4" class="note" style="padding:10px;">No assignable monsters found for this master at your slayer level.</td></tr>';
     } else {
       sorted.forEach((m, i) => {
-        const r = state.ratings[m.id];
+        const r = getRating(master, m.id);
+        const isHard = getHardBlock(master, m.id);
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${i + 1}</td>
           <td>${m.name}</td>
           <td>${m.weights[master]}</td>
-          <td><span class="badge badge-${r}">${RATING_LABELS[r]}</span></td>
+          <td>
+            <span class="badge badge-${r}">${RATING_LABELS[r]}</span>
+            ${isHard ? '<span class="badge badge-hard" style="margin-left:4px;">Hard Block</span>' : ''}
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -875,43 +835,130 @@ function buildRecommender() {
   };
   renderRecTable();
 
+  const hardCount = hardBlockedAssignable.length;
   document.getElementById('rec-note').textContent =
-    `Showing top ${Math.min(N, recommended.length)} of ${assignable.length} assignable monsters, sorted by weight. ` +
-    `Priority: rated 1 & 2 first, then 3, then 4.`;
+    `${recommended.length} of ${N} block slots used (${hardCount} hard block${hardCount !== 1 ? 's' : ''}, ${recommended.length - hardCount} auto-filled). ` +
+    `Auto-fill priority: Hate/Dislike first by weight, then Neutral, then Love.`;
 
   // -- SKIP ANALYSIS --
   buildSkipAnalysis(master, assignable, blockedIds);
 
   // -- FULL TASK LIST --
+  // All monsters this master CAN assign (meets level), regardless of unlocked
+  const allMasterMonsters = monsters.filter(m =>
+    m.weights[master] > 0 && m.slayerLvl <= state.slayerLevel
+  );
   const pool = assignable.filter(m => !blockedIds.has(m.id));
   const poolWeight = pool.reduce((s, m) => s + m.weights[master], 0);
 
-  // Tag chance & blocked for sorting
-  assignable.forEach(m => {
+  allMasterMonsters.forEach(m => {
     m._blocked = blockedIds.has(m.id);
-    m._chance = (!m._blocked && poolWeight > 0) ? (m.weights[master] / poolWeight) * 100 : -1;
+    const inPool = !m._blocked && getUnlocked(master, m.id);
+    m._chance = (inPool && poolWeight > 0) ? (m.weights[master] / poolWeight) * 100 : -1;
   });
 
   const renderFullTable = () => {
     applySortHeaders('full-task-table', state.fullSort, renderFullTable);
-    const sorted = sortRows(assignable, state.fullSort.col, state.fullSort.dir, master);
+    const sorted = sortRows(allMasterMonsters, state.fullSort.col, state.fullSort.dir, master);
     const tbody = document.getElementById('full-task-tbody');
     tbody.innerHTML = '';
     sorted.forEach(m => {
-      const r = state.ratings[m.id];
+      const r = getRating(master, m.id);
+      const unlocked = getUnlocked(master, m.id);
+      const hardBlocked = getHardBlock(master, m.id);
+      const note = getNote(master, m.id);
       const chanceStr = m._chance >= 0 ? m._chance.toFixed(1) + '%' : '—';
+      const hardCount = countHardBlocks(master);
+      // Disable hard block checkbox if at cap and this monster isn't already hard-blocked
+      const atCap = hardCount >= N && !hardBlocked;
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${m.name}</td>
+        <td><a href="${wikiUrl(m.name)}" target="_blank" rel="noopener noreferrer" style="color:var(--link-color);text-decoration:none;font-weight:500;">${m.name}</a></td>
         <td>${m.weights[master]}</td>
         <td>${chanceStr}</td>
-        <td><span class="badge badge-${r}">${RATING_LABELS[r]}</span></td>
-        <td><span class="badge ${m._blocked ? 'badge-yes' : 'badge-no'}">${m._blocked ? 'Blocked' : 'No'}</span></td>
+        <td style="text-align:center;">
+          <input type="checkbox" class="unlock-cb" data-id="${m.id}" ${unlocked ? 'checked' : ''}>
+        </td>
+        <td>
+          <div class="rating-group" data-id="${m.id}">
+            <button class="rating-btn r1 ${r==1?'active':''}" data-val="1">Hate</button>
+            <button class="rating-btn r2 ${r==2?'active':''}" data-val="2">Dislike</button>
+            <button class="rating-btn r3 ${r==3?'active':''}" data-val="3">Neutral</button>
+            <button class="rating-btn r4 ${r==4?'active':''}" data-val="4">Love</button>
+          </div>
+        </td>
+        <td style="text-align:center;">
+          <input type="checkbox" class="hardblock-cb" data-id="${m.id}" ${hardBlocked ? 'checked' : ''} ${atCap ? 'disabled title="Block list full (max '+N+')"' : ''}>
+        </td>
+        <td><span class="badge ${m._blocked ? 'badge-yes' : 'badge-no'}">${m._blocked ? 'Yes' : 'No'}</span></td>
+        <td style="min-width:240px;">
+          <textarea class="notes-input" data-id="${m.id}" placeholder="Notes…" rows="2">${note.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+        </td>
       `;
       tbody.appendChild(tr);
     });
+
+    // Wire up inline editing events
+    tbody.querySelectorAll('.rating-group').forEach(group => {
+      group.addEventListener('click', e => {
+        const btn = e.target.closest('.rating-btn');
+        if (!btn) return;
+        const val = parseInt(btn.dataset.val);
+        const id = parseInt(group.dataset.id);
+        setRating(master, id, val);
+        // Update active state in-place without full re-render
+        group.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        saveState();
+        buildRecommender();
+      });
+    });
+    tbody.querySelectorAll('.unlock-cb').forEach(cb => {
+      cb.addEventListener('change', e => {
+        setUnlocked(master, parseInt(e.target.dataset.id), e.target.checked);
+        saveState();
+        buildRecommender();
+      });
+    });
+    tbody.querySelectorAll('.hardblock-cb').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const id = parseInt(e.target.dataset.id);
+        const newVal = e.target.checked;
+        // Double-check cap on enable
+        if (newVal && countHardBlocks(master) >= N) {
+          e.target.checked = false;
+          return;
+        }
+        setHardBlock(master, id, newVal);
+        saveState();
+        buildRecommender();
+      });
+    });
+    tbody.querySelectorAll('.notes-input').forEach(inp => {
+      // Auto-size to content on load
+      inp.style.height = 'auto';
+      inp.style.height = Math.max(42, inp.scrollHeight) + 'px';
+      inp.addEventListener('input', e => {
+        setNote(master, parseInt(e.target.dataset.id), e.target.value);
+        saveState();
+        // Grow with content
+        e.target.style.height = 'auto';
+        e.target.style.height = Math.max(42, e.target.scrollHeight) + 'px';
+      });
+    });
   };
   renderFullTable();
+
+  // Reset button for current master
+  document.getElementById('reset-master-ratings-btn').onclick = () => {
+    if (!confirm(`Reset all ratings, unlocked states, hard blocks, and notes for ${master} to defaults?`)) return;
+    delete state.ratings[master];
+    delete state.unlocked[master];
+    delete state.hardBlocks[master];
+    delete state.notes[master];
+    saveState();
+    buildRecommender();
+  };
 }
 
 function buildSkipAnalysis(master, assignable, blockedIds) {
@@ -920,25 +967,25 @@ function buildSkipAnalysis(master, assignable, blockedIds) {
   const basePoints = getMasterPoints(master);
 
   const strategies = [
-    { label: 'Skip Ratings 1', skipFn: r => r <= 1 },
-    { label: 'Skip Ratings 1–2', skipFn: r => r <= 2 },
-    { label: 'Skip Ratings 1–3', skipFn: r => r <= 3 },
+    { label: 'Skip Hate only', skipFn: r => r <= 1 },
+    { label: 'Skip Hate & Dislike', skipFn: r => r <= 2 },
+    { label: 'Skip Hate, Dislike & Neutral', skipFn: r => r <= 3 },
   ];
 
   const container = document.getElementById('skip-analysis-container');
   container.innerHTML = '';
 
   const pct = (fn) => poolWeight > 0
-    ? ((pool.filter(m => fn(state.ratings[m.id])).reduce((s,m)=>s+m.weights[master],0)/poolWeight)*100).toFixed(1)
+    ? ((pool.filter(m => fn(getRating(master, m.id))).reduce((s,m)=>s+m.weights[master],0)/poolWeight)*100).toFixed(1)
     : '0.0';
 
   const distDiv = document.createElement('div');
   distDiv.className = 'dist-row';
   distDiv.innerHTML = `
     <div class="dist-item"><span class="dist-label">Pool size</span><span class="dist-val">${pool.length} monsters (wt: ${poolWeight})</span></div>
-    <div class="dist-item"><span class="dist-label">% Rated 1–2</span><span class="dist-val">${pct(r=>r<=2)}%</span></div>
-    <div class="dist-item"><span class="dist-label">% Rated 3</span><span class="dist-val">${pct(r=>r===3)}%</span></div>
-    <div class="dist-item"><span class="dist-label">% Rated 4</span><span class="dist-val">${pct(r=>r===4)}%</span></div>
+    <div class="dist-item"><span class="dist-label">% Hate/Dislike</span><span class="dist-val">${pct(r=>r<=2)}%</span></div>
+    <div class="dist-item"><span class="dist-label">% Neutral</span><span class="dist-val">${pct(r=>r===3)}%</span></div>
+    <div class="dist-item"><span class="dist-label">% Love</span><span class="dist-val">${pct(r=>r===4)}%</span></div>
     <div class="dist-item"><span class="dist-label">Base pts/task</span><span class="dist-val">${basePoints}${master==='Nieve' ? (state.nieveElite ? ' (Elite Diary)' : ' (no diary)') : ''}</span></div>
   `;
   container.appendChild(distDiv);
@@ -948,7 +995,7 @@ function buildSkipAnalysis(master, assignable, blockedIds) {
   grid.style.marginTop = '10px';
 
   strategies.forEach(strat => {
-    const skipWeight = pool.filter(m => strat.skipFn(state.ratings[m.id])).reduce((s,m) => s + m.weights[master], 0);
+    const skipWeight = pool.filter(m => strat.skipFn(getRating(master, m.id))).reduce((s,m) => s + m.weights[master], 0);
     const pSkip = poolWeight > 0 ? skipWeight / poolWeight : 0;
     const pKeep = 1 - pSkip;
     const expectedSkips = pKeep > 0 ? pSkip / pKeep : Infinity;
@@ -984,10 +1031,9 @@ function init() {
   slayerLvlEl.value = state.slayerLevel;
 
   maxBlocksEl.addEventListener('change', () => {
-    state.maxBlocks = Math.max(1, parseInt(maxBlocksEl.value) || 6);
+    state.maxBlocks = Math.min(7, Math.max(1, parseInt(maxBlocksEl.value) || 7));
     maxBlocksEl.value = state.maxBlocks;
     saveState();
-    buildRatingsTable();
     buildRecommender();
   });
 
@@ -995,18 +1041,7 @@ function init() {
     state.slayerLevel = Math.min(99, Math.max(1, parseInt(slayerLvlEl.value) || 99));
     slayerLvlEl.value = state.slayerLevel;
     saveState();
-    buildRatingsTable();
     buildRecommender();
-  });
-
-  // Tabs
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    });
   });
 
   // Master select
@@ -1028,20 +1063,6 @@ function init() {
     buildRecommender();
   });
 
-  // Search / filter
-  document.getElementById('monster-search').addEventListener('input', buildRatingsTable);
-  document.getElementById('filter-rating').addEventListener('change', buildRatingsTable);
-
-  // Reset
-  document.getElementById('reset-ratings-btn').addEventListener('click', () => {
-    if (!confirm('Reset all monster ratings to Neutral (3) and all unlocked states to checked?')) return;
-    monsters.forEach(m => { state.ratings[m.id] = 3; state.unlocked[m.id] = true; });
-    saveState();
-    buildRatingsTable();
-    buildRecommender();
-  });
-
-  buildRatingsTable();
   buildRecommender();
 }
 
