@@ -668,6 +668,7 @@ const { monsters, masters } = parseCSV(CSV);
 let state = {
   maxBlocks: 7,
   slayerLevel: 99,
+  selectedMaster: null,
   nieveElite: false,
   konarElite: false,
   ratings: {},
@@ -682,6 +683,7 @@ let currentUser = null;
 function resetState() {
   state.maxBlocks = 7;
   state.slayerLevel = 99;
+  state.selectedMaster = null;
   state.nieveElite = false;
   state.konarElite = false;
   state.ratings = {};
@@ -696,10 +698,11 @@ function applyState(parsed) {
   if (parsed.unlocked)   state.unlocked   = parsed.unlocked;
   if (parsed.hardBlocks) state.hardBlocks = parsed.hardBlocks;
   if (parsed.notes)      state.notes      = parsed.notes;
-  if (parsed.maxBlocks   !== undefined) state.maxBlocks   = parsed.maxBlocks;
-  if (parsed.slayerLevel !== undefined) state.slayerLevel = parsed.slayerLevel;
-  if (parsed.nieveElite  !== undefined) state.nieveElite  = parsed.nieveElite;
-  if (parsed.konarElite  !== undefined) state.konarElite  = parsed.konarElite;
+  if (parsed.maxBlocks       !== undefined) state.maxBlocks       = parsed.maxBlocks;
+  if (parsed.slayerLevel     !== undefined) state.slayerLevel     = parsed.slayerLevel;
+  if (parsed.selectedMaster  !== undefined) state.selectedMaster  = parsed.selectedMaster;
+  if (parsed.nieveElite      !== undefined) state.nieveElite      = parsed.nieveElite;
+  if (parsed.konarElite      !== undefined) state.konarElite      = parsed.konarElite;
 }
 
 function getRating(master, monsterId) {
@@ -1157,7 +1160,11 @@ function init() {
     opt.textContent = `${m} (${MASTER_POINTS[m] ?? '?'} pts/task)`;
     masterSel.appendChild(opt);
   });
-  masterSel.addEventListener('change', buildRecommender);
+  masterSel.addEventListener('change', () => {
+    state.selectedMaster = masterSel.value;
+    saveState();
+    buildRecommender();
+  });
 
   // Nieve diary toggle
   const nieveEl = document.getElementById('nieve-diary-cb');
@@ -1186,6 +1193,9 @@ function init() {
     slayerLvlEl.value = state.slayerLevel;
     nieveEl.checked = state.nieveElite;
     konarEl.checked = state.konarElite;
+    if (state.selectedMaster && masters.includes(state.selectedMaster)) {
+      masterSel.value = state.selectedMaster;
+    }
 
     // Update auth bar
     document.getElementById('btn-signin').style.display = user ? 'none' : '';
