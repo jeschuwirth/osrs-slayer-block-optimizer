@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSRS Slayer Block List Optimizer</title>
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --body-main: #e2dbc8;
+  --body-light: #d8ccb4;
+  --body-mid: #d0bd97;
+  --body-dark: #b8a282;
+  --body-border: #94866d;
+  --body-background-color: #c0a886;
+  --button-background: #605443;
+  --button-border: #3c352a;
+  --button-dark: #18140c;
+  --button-light: #3a301d;
+  --link-color: #936039;
+  --background-text-color: #444;
+  --background-link-color: #52351e;
+
+  --hate-color: #8b0000;
+  --dislike-color: #b35900;
+  --neutral-color: #7a6a00;
+  --love-color: #2d5a1b;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background-color: var(--body-background-color);
+  color: var(--background-text-color);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ---- LAYOUT ---- */
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 16px 40px;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'PT Serif', serif;
+  color: var(--background-link-color);
+}
+
+h1 {
+  font-size: 1.7rem;
+  border-bottom: 2px solid var(--body-border);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 18px;
+}
+
+/* ---- PANELS ---- */
+.panel {
+  background: var(--body-main);
+  border: 1px solid var(--body-border);
+  margin-bottom: 18px;
+  padding: 14px 16px;
+}
+
+.panel-title {
+  font-family: 'PT Serif', serif;
+  color: var(--background-link-color);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--body-border);
+  padding-bottom: 5px;
+}
+
+/* ---- SETTINGS ---- */
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-end;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-group label {
+  font-family: 'PT Serif', serif;
+  font-size: 0.85rem;
+  color: var(--background-link-color);
+  font-weight: 700;
+}
+
+input[type="number"], select {
+  background: var(--body-light);
+  border: 1px solid var(--body-border);
+  color: var(--background-text-color);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.9rem;
+  padding: 5px 8px;
+  border-radius: 2px;
+  width: 80px;
+}
+
+select { width: auto; min-width: 160px; cursor: pointer; }
+
+button {
+  background: var(--button-background);
+  border: 1px solid var(--button-border);
+  color: #f5ead8;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s;
+}
+button:hover { background: var(--button-light); }
+
+/* ---- TABS ---- */
+.tab-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--body-border);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  background: var(--body-light);
+  border: 1px solid var(--body-border);
+  border-bottom: none;
+  color: var(--background-link-color);
+  font-family: 'PT Serif', serif;
+  font-size: 0.88rem;
+  padding: 6px 14px;
+  cursor: pointer;
+  margin-right: 2px;
+  margin-bottom: -2px;
+  border-radius: 2px 2px 0 0;
+  transition: background 0.12s;
+}
+.tab-btn:hover { background: var(--body-mid); }
+.tab-btn.active {
+  background: var(--body-main);
+  border-bottom: 2px solid var(--body-main);
+  font-weight: 700;
+  z-index: 1;
+}
+
+/* ---- TABLES ---- */
+.wiki-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87rem;
+}
+
+.wiki-table th {
+  background: var(--body-mid);
+  color: var(--background-link-color);
+  font-family: 'PT Serif', serif;
+  font-weight: 700;
+  padding: 6px 9px;
+  border: 1px solid var(--body-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.wiki-table td {
+  padding: 5px 9px;
+  border: 1px solid var(--body-border);
+  vertical-align: middle;
+}
+
+.wiki-table tr:nth-child(odd) td { background: var(--body-main); }
+.wiki-table tr:nth-child(even) td { background: var(--body-light); }
+.wiki-table tr:hover td { background: var(--body-mid); }
+
+.wiki-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.wiki-table th.sortable:hover { background: var(--body-dark); }
+.wiki-table th .sort-arrow {
+  display: inline-block;
+  margin-left: 5px;
+  color: var(--background-link-color);
+  opacity: 0.4;
+  font-size: 0.75rem;
+}
+.wiki-table th.sort-asc .sort-arrow,
+.wiki-table th.sort-desc .sort-arrow { opacity: 1; }
+
+.wiki-table tr.disabled-row td { opacity: 0.5; }
+
+/* ---- RATING SELECT ---- */
+.rating-select {
+  width: 110px;
+  font-size: 0.82rem;
+  padding: 3px 6px;
+}
+
+/* ---- BADGES ---- */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+.badge-1 { background: var(--hate-color); }
+.badge-2 { background: var(--dislike-color); }
+.badge-3 { background: var(--neutral-color); }
+.badge-4 { background: var(--love-color); }
+
+.badge-yes { background: var(--love-color); }
+.badge-no  { background: #555; }
+
+/* ---- RECOMMENDED BLOCKS ---- */
+.rec-block-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.rec-item {
+  background: var(--body-light);
+  border: 1px solid var(--body-border);
+  padding: 5px 10px;
+  border-radius: 2px;
+  font-size: 0.86rem;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.rec-num {
+  font-family: 'PT Serif', serif;
+  font-weight: 700;
+  color: var(--background-link-color);
+  min-width: 18px;
+}
+
+.rec-weight {
+  color: #666;
+  font-size: 0.78rem;
+}
+
+/* ---- SKIP ANALYSIS ---- */
+.skip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.skip-card {
+  background: var(--body-light);
+  border: 1px solid var(--body-border);
+  padding: 10px 12px;
+  border-radius: 2px;
+}
+
+.skip-card-title {
+  font-family: 'PT Serif', serif;
+  font-weight: 700;
+  color: var(--background-link-color);
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.skip-stat {
+  font-size: 0.88rem;
+  margin-bottom: 3px;
+}
+
+.skip-stat strong {
+  color: var(--background-link-color);
+}
+
+.skip-pts {
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: 'PT Serif', serif;
+}
+
+.pts-positive { color: var(--love-color); }
+.pts-negative { color: var(--hate-color); }
+
+/* ---- DIST TABLE ---- */
+.dist-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.84rem;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--body-light);
+  border: 1px solid var(--body-border);
+}
+.dist-item { display: flex; flex-direction: column; gap: 2px; }
+.dist-label { font-size: 0.75rem; color: #666; }
+.dist-val { font-weight: 600; color: var(--background-link-color); }
+
+/* ---- SEARCH ---- */
+.search-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+#monster-search {
+  background: var(--body-light);
+  border: 1px solid var(--body-border);
+  color: var(--background-text-color);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.9rem;
+  padding: 5px 8px;
+  border-radius: 2px;
+  width: 200px;
+}
+
+.filter-select {
+  width: auto;
+  min-width: 130px;
+}
+
+/* ---- SCROLLABLE TABLE ---- */
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* ---- CHECKBOX ---- */
+input[type="checkbox"] {
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--button-background);
+}
+
+.page-section-title {
+  font-family: 'PT Serif', serif;
+  color: var(--background-link-color);
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--body-border);
+  padding-bottom: 4px;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 6px;
+}
+
+.slayer-lvl-pill {
+  display: inline-block;
+  background: var(--body-dark);
+  color: var(--background-link-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+#page-tabs { margin-bottom: 0; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <h1>⚔ OSRS Slayer Block List Optimizer</h1>
+  <p class="subtitle">Optimize your block list to minimize unwanted slayer tasks. Data: OSRS Wiki (May 2026).</p>
+
+  <!-- GLOBAL SETTINGS -->
+  <div class="panel">
+    <div class="panel-title">Global Settings</div>
+    <div class="settings-row">
+      <div class="field-group">
+        <label for="max-blocks">Max Blocks (N)</label>
+        <input type="number" id="max-blocks" min="1" max="10" value="6">
+      </div>
+      <div class="field-group">
+        <label for="slayer-level">My Slayer Level</label>
+        <input type="number" id="slayer-level" min="1" max="99" value="99">
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE TABS -->
+  <div class="tab-row" id="page-tabs">
+    <button class="tab-btn active" data-tab="ratings">Monster Ratings</button>
+    <button class="tab-btn" data-tab="recommender">Block Recommender</button>
+  </div>
+
+  <!-- TAB: MONSTER RATINGS -->
+  <div class="tab-content active" id="tab-ratings">
+    <div class="panel">
+      <div class="panel-title">Monster Ratings</div>
+      <div class="search-row">
+        <input type="text" id="monster-search" placeholder="Search monsters…">
+        <div class="field-group" style="flex-direction:row;align-items:center;gap:6px;">
+          <label style="font-size:0.82rem;color:#555;">Filter rating:</label>
+          <select id="filter-rating" class="filter-select">
+            <option value="all">All ratings</option>
+            <option value="1">1 – Hate</option>
+            <option value="2">2 – Dislike</option>
+            <option value="3">3 – Neutral</option>
+            <option value="4">4 – Love</option>
+          </select>
+        </div>
+        <button id="reset-ratings-btn">Reset All Ratings</button>
+      </div>
+      <div class="table-scroll">
+        <table class="wiki-table" id="ratings-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Monster</th>
+              <th>Slayer Lvl</th>
+              <th>Unlocked</th>
+              <th>Rating</th>
+              <th>Label</th>
+            </tr>
+          </thead>
+          <tbody id="ratings-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: RECOMMENDER -->
+  <div class="tab-content" id="tab-recommender">
+    <div class="panel">
+      <div class="panel-title">Slayer Master Block Recommender</div>
+      <div class="settings-row" style="margin-bottom:14px;">
+        <div class="field-group">
+          <label for="master-select">Select Slayer Master</label>
+          <select id="master-select"></select>
+        </div>
+        <div class="field-group" id="nieve-diary-field" style="display:none; flex-direction:row; align-items:center; gap:8px; margin-top:18px;">
+          <input type="checkbox" id="nieve-diary-cb" style="width:16px;height:16px;">
+          <label for="nieve-diary-cb" style="font-family:'PT Serif',serif; font-size:0.85rem; color:var(--background-link-color); font-weight:700; cursor:pointer;">
+            Elite Western Diary completed (15 pts/task)
+          </label>
+        </div>
+      </div>
+
+      <!-- RECOMMENDED BLOCKS -->
+      <div class="page-section-title">Recommended Blocks</div>
+      <div class="table-scroll" style="margin-bottom:6px;">
+        <table class="wiki-table" id="rec-blocks-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Monster</th>
+              <th>Weight</th>
+              <th>Rating</th>
+            </tr>
+          </thead>
+          <tbody id="rec-blocks-tbody"></tbody>
+        </table>
+      </div>
+      <p class="note" id="rec-note"></p>
+
+      <!-- SKIP ANALYSIS -->
+      <div class="page-section-title" style="margin-top:16px;">Skip Analysis</div>
+      <div id="skip-analysis-container"></div>
+
+      <!-- FULL TASK LIST -->
+      <div class="page-section-title" style="margin-top:16px;">Full Task List</div>
+      <div class="table-scroll">
+        <table class="wiki-table" id="full-task-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-table="full" data-col="name">Monster<span class="sort-arrow">↕</span></th>
+              <th class="sortable sort-desc" data-table="full" data-col="weight">Weight<span class="sort-arrow">▼</span></th>
+              <th class="sortable" data-table="full" data-col="chance">Chance (%)<span class="sort-arrow">↕</span></th>
+              <th class="sortable" data-table="full" data-col="rating">Rating<span class="sort-arrow">↕</span></th>
+              <th class="sortable" data-table="full" data-col="blocked">Blocked?<span class="sort-arrow">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="full-task-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ========================
+// DATA
+// ========================
+const CSV = `ID,Monster,Slayer lvl,Nieve,Duradel,Konar quo Maten,Mazchna,Turael,Spria,Krystilia,Vannaka,Chaeldar
+1,Aberrant spectres,60,6,7,6,0,0,0,0,8,8
+2,Abyssal demons,85,9,12,9,0,0,0,9,5,12
+3,Ankou,1,5,5,5,0,0,0,9,8,0
+4,Aquanites,78,5,5,0,0,0,0,0,0,0
+5,Araxytes,92,8,10,0,0,0,0,0,0,0
+6,Aviansies,1,6,8,0,0,0,0,0,0,9
+7,Bandits,1,0,0,0,0,0,0,8,0,0
+8,Banshees,15,0,0,0,8,8,8,0,0,0
+9,Basilisks,40,6,7,6,0,0,0,0,8,7
+10,Bats,1,0,0,0,7,7,7,0,0,0
+11,Bears,1,0,0,0,6,7,7,0,0,0
+12,Birds,1,0,0,0,0,6,6,0,0,0
+13,Black demons,1,9,8,8,0,0,0,9,0,10
+14,Black dragons,1,6,9,7,0,0,0,0,0,0
+15,Black Knights,1,0,0,0,0,0,0,7,0,0
+16,Bloodvelds,50,9,8,8,0,0,0,9,8,8
+17,Blue dragons,1,4,4,5,0,0,0,0,7,8
+18,Brine rats,47,3,0,0,0,0,0,0,7,7
+19,Catablepon,1,0,0,0,8,0,0,0,0,0
+20,Cave bugs,7,0,0,0,8,8,8,0,0,0
+21,Cave crawlers,10,0,0,0,8,8,8,0,0,0
+22,Cave horrors,58,5,4,0,0,0,0,0,0,10
+23,Cave kraken,87,6,9,8,0,0,0,0,0,12
+24,Cave slimes,17,0,0,0,8,8,8,0,0,0
+25,Chaos druids,1,0,0,0,0,0,0,9,0,0
+26,Cockatrices,25,0,0,0,8,0,0,0,8,0
+27,Cows,1,0,0,0,0,8,8,0,0,0
+28,Crabs,1,0,0,0,8,0,0,0,8,8
+29,Crawling Hands,5,0,0,0,8,8,8,0,0,0
+30,Crocodiles,1,0,0,0,0,0,0,0,6,0
+31,Custodian stalkers,54,8,0,0,0,0,0,0,0,11
+32,Dagannoth,1,8,9,8,0,0,0,0,7,11
+33,Dark beasts,90,5,11,0,0,0,0,0,0,0
+34,Dark warriors,1,0,0,0,0,0,0,8,0,0
+35,Dogs,1,0,0,0,7,7,7,0,0,0
+36,Drakes,84,7,8,9,0,0,0,0,0,0
+37,Dust devils,65,6,5,6,0,0,0,9,8,9
+38,Dwarves,1,0,0,0,0,7,7,0,0,0
+39,Earth Warriors,1,0,0,0,0,0,0,6,0,0
+40,Elves,1,4,4,0,0,0,0,0,7,8
+41,Ent,1,0,0,0,0,0,0,7,0,0
+42,Fever spiders,42,0,0,0,0,0,0,0,7,7
+43,Fire giants,1,9,7,8,0,0,0,0,7,12
+44,Flesh Crawlers,1,0,0,0,7,0,0,0,0,0
+45,Fossil Island Wyverns,66,5,7,5,0,0,0,0,0,7
+46,Frost dragons,1,5,5,0,0,0,0,0,0,0
+47,Gargoyles,75,6,8,7,0,0,0,0,5,11
+48,Ghosts,1,0,0,0,7,7,7,0,0,0
+49,Ghouls,1,0,0,0,7,0,0,0,7,0
+50,Goblins,1,0,0,0,0,7,7,0,0,0
+51,Greater demons,1,7,9,7,0,0,0,0,0,9
+52,Green dragons,1,0,0,0,0,0,0,8,0,0
+53,Gryphons,51,7,7,0,0,0,0,0,10,10
+54,Harpie bug swarms,33,0,0,0,0,0,0,0,8,0
+55,Hellhounds,1,8,10,10,0,0,0,9,7,9
+56,Hill Giant,1,0,0,0,7,0,0,0,7,0
+57,Hobgoblins,1,0,0,0,7,0,0,0,7,0
+58,Hydras,95,0,0,9,0,0,0,0,0,0
+59,Ice giants,1,0,0,0,0,0,0,7,7,0
+60,Ice warriors,1,0,0,0,7,0,0,7,7,0
+61,Icefiends,1,0,0,0,0,0,8,0,0,0
+62,Infernal Mages,45,0,0,0,0,0,0,0,8,0
+63,Jellies,52,0,0,0,0,0,0,9,8,10
+64,Jungle horrors,1,0,0,0,0,0,0,0,8,10
+65,Kalphite,1,9,9,8,6,0,6,0,7,11
+66,Killerwatts,37,0,0,0,6,0,0,0,0,0
+67,Kurasks,70,3,4,0,0,0,0,0,7,12
+68,Lava dragons,1,0,0,0,0,0,0,7,0,0
+69,Lesser demons,1,0,0,0,0,0,0,0,7,9
+70,Lesser Naguas,1,0,0,0,0,0,0,0,0,4
+71,Lizardmen,1,8,10,10,0,0,0,0,0,9
+72,Lizards,22,0,0,0,8,0,8,0,0,0
+73,Magic axes,1,0,0,0,0,0,0,7,0,0
+74,Mammoth,1,0,0,0,0,0,0,5,0,0
+75,Metal dragons,1,12,14,8,0,0,0,0,0,0
+76,Minotaurs,1,0,0,0,0,0,7,0,0,0
+77,Mogres,32,0,0,0,8,0,0,0,7,0
+78,Molanisks,39,0,0,0,0,0,0,0,7,0
+79,Monkeys,1,0,0,0,0,0,6,0,0,0
+80,Moss giants,1,0,0,0,0,0,0,0,7,0
+81,Nechryael,80,7,9,8,0,0,0,9,5,0
+82,Ogres,1,0,0,0,0,0,0,0,7,0
+83,Otherworldly beings,1,0,0,0,0,0,0,0,8,0
+84,Pirate,1,0,0,0,0,0,0,7,0,0
+85,Pyrefiends,30,0,0,0,8,0,0,0,8,0
+86,Rats,1,0,0,0,0,0,7,0,0,0
+87,Red dragons,1,5,8,6,0,0,0,0,0,0
+88,Revenants,1,0,0,0,0,0,0,8,0,0
+89,Rockslugs,20,0,0,0,8,0,0,0,0,0
+90,Rogues,1,0,0,0,0,0,0,7,0,0
+91,Scabarites,1,4,0,0,0,0,0,0,0,0
+92,Scorpions,1,0,0,0,7,0,7,0,0,0
+93,Sea snakes,1,0,0,0,0,0,0,0,6,0
+94,Shades,1,0,0,0,8,0,0,0,8,0
+95,Shadow warriors,1,0,0,0,0,0,0,0,8,0
+96,Skeletal Wyverns,72,5,7,6,0,0,0,0,0,0
+97,Skeletons,1,0,0,0,7,0,7,0,0,0
+98,Smoke devils,93,7,9,8,0,0,0,0,0,0
+99,Sourhogs,1,0,0,0,0,0,6,0,0,0
+100,Spiders,1,0,0,0,0,0,0,0,0,0
+101,Spiritual creatures,1,6,7,0,0,0,0,9,8,0
+102,Suqahs,1,8,8,0,0,0,0,0,0,0
+103,Terror dogs,40,0,0,0,0,0,0,0,6,0
+104,Trolls,1,6,6,7,0,0,0,0,7,0
+105,Turoths,55,3,0,0,0,0,0,0,8,0
+106,TzHaar,1,10,10,10,0,0,0,0,0,0
+107,Vampyres,1,6,8,0,6,0,0,0,7,0
+108,Wall beasts,35,0,0,0,7,0,0,0,0,0
+109,Warped creatures,56,6,8,0,0,0,0,0,0,0
+110,Waterfiends,1,0,2,3,0,0,0,0,0,0
+111,Werewolves,1,0,0,0,0,0,0,0,7,0
+112,Wolves,1,0,0,0,7,0,0,0,0,0
+113,Wyrms,62,7,8,12,0,0,0,0,0,0
+114,Zombies,1,0,0,0,7,0,0,0,0,0
+115,Zygomites,57,2,2,0,0,0,0,0,0,0`;
+
+const MASTER_POINTS = {
+  'Turael': 0, 'Spria': 0, 'Krystilia': 25, 'Mazchna': 6,
+  'Vannaka': 8, 'Chaeldar': 10, 'Konar quo Maten': 18, 'Nieve': 12, 'Duradel': 15
+};
+function getMasterPoints(master) {
+  if (master === 'Nieve' && state.nieveElite) return 15;
+  return MASTER_POINTS[master] ?? 0;
+}
+const SKIP_COST = 30;
+const RATING_LABELS = { 1: 'Hate', 2: 'Dislike', 3: 'Neutral', 4: 'Love' };
+
+// ========================
+// PARSE CSV
+// ========================
+function parseCSV(csv) {
+  const lines = csv.trim().split('\n');
+  const headers = lines[0].split(',');
+  const masters = headers.slice(3); // Nieve, Duradel, ...
+  const monsters = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',');
+    const m = {
+      id: parseInt(cols[0]),
+      name: cols[1].trim(),
+      slayerLvl: parseInt(cols[2]),
+      weights: {}
+    };
+    masters.forEach((master, idx) => {
+      m.weights[master.trim()] = parseInt(cols[3 + idx]) || 0;
+    });
+    monsters.push(m);
+  }
+  return { monsters, masters: masters.map(m => m.trim()) };
+}
+
+const { monsters, masters } = parseCSV(CSV);
+
+// ========================
+// STATE
+// ========================
+let state = {
+  maxBlocks: 6,
+  slayerLevel: 99,
+  nieveElite: false,
+  ratings: {},     // id -> 1-4
+  unlocked: {},    // id -> bool
+  recSort: { col: 'rank', dir: 'asc' },
+  fullSort: { col: 'weight', dir: 'desc' },
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('osrs_slayer_optimizer_v1');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge carefully — don't overwrite sort objects from defaults with saved primitives
+      if (parsed.ratings) state.ratings = parsed.ratings;
+      if (parsed.unlocked) state.unlocked = parsed.unlocked;
+      if (parsed.maxBlocks !== undefined) state.maxBlocks = parsed.maxBlocks;
+      if (parsed.slayerLevel !== undefined) state.slayerLevel = parsed.slayerLevel;
+      if (parsed.nieveElite !== undefined) state.nieveElite = parsed.nieveElite;
+    }
+  } catch(e) {}
+  // Defaults
+  monsters.forEach(m => {
+    if (state.ratings[m.id] === undefined) state.ratings[m.id] = 3;
+    if (state.unlocked[m.id] === undefined) state.unlocked[m.id] = true;
+  });
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('osrs_slayer_optimizer_v1', JSON.stringify(state));
+  } catch(e) {}
+}
+
+// ========================
+// RATINGS TABLE
+// ========================
+function buildRatingsTable() {
+  const tbody = document.getElementById('ratings-tbody');
+  tbody.innerHTML = '';
+
+  const search = document.getElementById('monster-search').value.toLowerCase();
+  const filterRating = document.getElementById('filter-rating').value;
+  const myLevel = state.slayerLevel;
+
+  monsters.forEach(m => {
+    if (search && !m.name.toLowerCase().includes(search)) return;
+    if (filterRating !== 'all' && state.ratings[m.id] != filterRating) return;
+
+    const meetsLevel = m.slayerLvl <= myLevel;
+    const rating = state.ratings[m.id];
+    const unlocked = state.unlocked[m.id];
+
+    const tr = document.createElement('tr');
+    if (!meetsLevel) tr.classList.add('disabled-row');
+
+    tr.innerHTML = `
+      <td>${m.id}</td>
+      <td>${m.name}</td>
+      <td><span class="slayer-lvl-pill">${m.slayerLvl}</span></td>
+      <td style="text-align:center;">
+        <input type="checkbox" data-id="${m.id}" class="unlock-cb" ${unlocked ? 'checked' : ''}>
+      </td>
+      <td>
+        <select class="rating-select" data-id="${m.id}">
+          <option value="1" ${rating==1?'selected':''}>1 – Hate</option>
+          <option value="2" ${rating==2?'selected':''}>2 – Dislike</option>
+          <option value="3" ${rating==3?'selected':''}>3 – Neutral</option>
+          <option value="4" ${rating==4?'selected':''}>4 – Love</option>
+        </select>
+      </td>
+      <td><span class="badge badge-${rating}">${RATING_LABELS[rating]}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Events
+  tbody.querySelectorAll('.rating-select').forEach(sel => {
+    sel.addEventListener('change', e => {
+      const id = parseInt(e.target.dataset.id);
+      state.ratings[id] = parseInt(e.target.value);
+      saveState();
+      buildRatingsTable();
+      buildRecommender();
+    });
+  });
+  tbody.querySelectorAll('.unlock-cb').forEach(cb => {
+    cb.addEventListener('change', e => {
+      const id = parseInt(e.target.dataset.id);
+      state.unlocked[id] = e.target.checked;
+      saveState();
+      buildRecommender();
+    });
+  });
+}
+
+// ========================
+// SORT HELPERS
+// ========================
+function applySortHeaders(tableId, sortState, renderFn) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  table.querySelectorAll('th.sortable').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    const arrow = th.querySelector('.sort-arrow');
+    if (arrow) arrow.textContent = '↕';
+    if (th.dataset.col === sortState.col) {
+      th.classList.add(sortState.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+      if (arrow) arrow.textContent = sortState.dir === 'asc' ? '▲' : '▼';
+    }
+    th.onclick = () => {
+      if (sortState.col === th.dataset.col) {
+        sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortState.col = th.dataset.col;
+        sortState.dir = th.dataset.col === 'name' ? 'asc' : 'desc';
+      }
+      renderFn();
+    };
+  });
+}
+
+function sortRows(rows, col, dir, master) {
+  const mult = dir === 'asc' ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    let va, vb;
+    switch(col) {
+      case 'rank':     va = a._rank; vb = b._rank; break;
+      case 'name':     va = a.name.toLowerCase(); vb = b.name.toLowerCase(); break;
+      case 'slayerLvl': va = a.slayerLvl; vb = b.slayerLvl; break;
+      case 'weight':   va = master ? a.weights[master] : 0; vb = master ? b.weights[master] : 0; break;
+      case 'rating':   va = state.ratings[a.id]; vb = state.ratings[b.id]; break;
+      case 'chance':   va = a._chance ?? -1; vb = b._chance ?? -1; break;
+      case 'blocked':  va = a._blocked ? 1 : 0; vb = b._blocked ? 1 : 0; break;
+      default: va = 0; vb = 0;
+    }
+    if (typeof va === 'string') return mult * va.localeCompare(vb);
+    return mult * (va - vb);
+  });
+}
+
+// ========================
+// RECOMMENDER
+// ========================
+function getAssignableMonsters(master) {
+  return monsters.filter(m =>
+    m.weights[master] > 0 &&
+    m.slayerLvl <= state.slayerLevel &&
+    state.unlocked[m.id]
+  );
+}
+
+function buildRecommender() {
+  const master = document.getElementById('master-select').value;
+  if (!master) return;
+
+  // Nieve diary toggle visibility
+  const diaryField = document.getElementById('nieve-diary-field');
+  diaryField.style.display = master === 'Nieve' ? 'flex' : 'none';
+
+  const N = state.maxBlocks;
+  const assignable = getAssignableMonsters(master);
+
+  // -- RECOMMENDED BLOCKS --
+  // Priority: ratings 1&2 (by weight desc), then 3, then 4
+  const byPriority = [...assignable].sort((a, b) => {
+    const ra = state.ratings[a.id];
+    const rb = state.ratings[b.id];
+    const ga = ra <= 2 ? 0 : ra === 3 ? 1 : 2;
+    const gb = rb <= 2 ? 0 : rb === 3 ? 1 : 2;
+    if (ga !== gb) return ga - gb;
+    return b.weights[master] - a.weights[master];
+  });
+
+  const recommended = byPriority.slice(0, N);
+  const blockedIds = new Set(recommended.map(m => m.id));
+
+  // Tag rank for sorting
+  recommended.forEach((m, i) => { m._rank = i + 1; });
+
+  // Apply sort & render rec table
+  const renderRecTable = () => {
+    const sorted = [...recommended].sort((a, b) => b.weights[master] - a.weights[master]);
+    const tbody = document.getElementById('rec-blocks-tbody');
+    tbody.innerHTML = '';
+    if (sorted.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="note" style="padding:10px;">No assignable monsters found for this master at your slayer level.</td></tr>';
+    } else {
+      sorted.forEach((m, i) => {
+        const r = state.ratings[m.id];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${m.name}</td>
+          <td>${m.weights[master]}</td>
+          <td><span class="badge badge-${r}">${RATING_LABELS[r]}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  };
+  renderRecTable();
+
+  document.getElementById('rec-note').textContent =
+    `Showing top ${Math.min(N, recommended.length)} of ${assignable.length} assignable monsters, sorted by weight. ` +
+    `Priority: rated 1 & 2 first, then 3, then 4.`;
+
+  // -- SKIP ANALYSIS --
+  buildSkipAnalysis(master, assignable, blockedIds);
+
+  // -- FULL TASK LIST --
+  const pool = assignable.filter(m => !blockedIds.has(m.id));
+  const poolWeight = pool.reduce((s, m) => s + m.weights[master], 0);
+
+  // Tag chance & blocked for sorting
+  assignable.forEach(m => {
+    m._blocked = blockedIds.has(m.id);
+    m._chance = (!m._blocked && poolWeight > 0) ? (m.weights[master] / poolWeight) * 100 : -1;
+  });
+
+  const renderFullTable = () => {
+    applySortHeaders('full-task-table', state.fullSort, renderFullTable);
+    const sorted = sortRows(assignable, state.fullSort.col, state.fullSort.dir, master);
+    const tbody = document.getElementById('full-task-tbody');
+    tbody.innerHTML = '';
+    sorted.forEach(m => {
+      const r = state.ratings[m.id];
+      const chanceStr = m._chance >= 0 ? m._chance.toFixed(1) + '%' : '—';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${m.name}</td>
+        <td>${m.weights[master]}</td>
+        <td>${chanceStr}</td>
+        <td><span class="badge badge-${r}">${RATING_LABELS[r]}</span></td>
+        <td><span class="badge ${m._blocked ? 'badge-yes' : 'badge-no'}">${m._blocked ? 'Blocked' : 'No'}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  };
+  renderFullTable();
+}
+
+function buildSkipAnalysis(master, assignable, blockedIds) {
+  const pool = assignable.filter(m => !blockedIds.has(m.id));
+  const poolWeight = pool.reduce((s, m) => s + m.weights[master], 0);
+  const basePoints = getMasterPoints(master);
+
+  const strategies = [
+    { label: 'Skip Ratings 1', skipFn: r => r <= 1 },
+    { label: 'Skip Ratings 1–2', skipFn: r => r <= 2 },
+    { label: 'Skip Ratings 1–3', skipFn: r => r <= 3 },
+  ];
+
+  const container = document.getElementById('skip-analysis-container');
+  container.innerHTML = '';
+
+  const pct = (fn) => poolWeight > 0
+    ? ((pool.filter(m => fn(state.ratings[m.id])).reduce((s,m)=>s+m.weights[master],0)/poolWeight)*100).toFixed(1)
+    : '0.0';
+
+  const distDiv = document.createElement('div');
+  distDiv.className = 'dist-row';
+  distDiv.innerHTML = `
+    <div class="dist-item"><span class="dist-label">Pool size</span><span class="dist-val">${pool.length} monsters (wt: ${poolWeight})</span></div>
+    <div class="dist-item"><span class="dist-label">% Rated 1–2</span><span class="dist-val">${pct(r=>r<=2)}%</span></div>
+    <div class="dist-item"><span class="dist-label">% Rated 3</span><span class="dist-val">${pct(r=>r===3)}%</span></div>
+    <div class="dist-item"><span class="dist-label">% Rated 4</span><span class="dist-val">${pct(r=>r===4)}%</span></div>
+    <div class="dist-item"><span class="dist-label">Base pts/task</span><span class="dist-val">${basePoints}${master==='Nieve' ? (state.nieveElite ? ' (Elite Diary)' : ' (no diary)') : ''}</span></div>
+  `;
+  container.appendChild(distDiv);
+
+  const grid = document.createElement('div');
+  grid.className = 'skip-grid';
+  grid.style.marginTop = '10px';
+
+  strategies.forEach(strat => {
+    const skipWeight = pool.filter(m => strat.skipFn(state.ratings[m.id])).reduce((s,m) => s + m.weights[master], 0);
+    const pSkip = poolWeight > 0 ? skipWeight / poolWeight : 0;
+    const pKeep = 1 - pSkip;
+    const expectedSkips = pKeep > 0 ? pSkip / pKeep : Infinity;
+    const netPts = basePoints - expectedSkips * SKIP_COST;
+    const netFmt = isFinite(netPts) ? netPts.toFixed(2) : '−∞';
+    const ptsClass = netPts >= 0 ? 'pts-positive' : 'pts-negative';
+
+    const card = document.createElement('div');
+    card.className = 'skip-card';
+    card.innerHTML = `
+      <div class="skip-card-title">${strat.label}</div>
+      <div class="skip-stat">Skip chance: <strong>${(pSkip*100).toFixed(1)}%</strong></div>
+      <div class="skip-stat">Avg skips/task: <strong>${isFinite(expectedSkips) ? expectedSkips.toFixed(2) : '∞'}</strong></div>
+      <div class="skip-stat">Net pts/resolved task:</div>
+      <div class="skip-pts ${ptsClass}">${isFinite(netPts) ? netFmt : '−∞'} pts</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+// ========================
+// INIT
+// ========================
+function init() {
+  loadState();
+
+  // Settings
+  const maxBlocksEl = document.getElementById('max-blocks');
+  const slayerLvlEl = document.getElementById('slayer-level');
+  maxBlocksEl.value = state.maxBlocks;
+  slayerLvlEl.value = state.slayerLevel;
+
+  maxBlocksEl.addEventListener('change', () => {
+    state.maxBlocks = Math.max(1, parseInt(maxBlocksEl.value) || 6);
+    maxBlocksEl.value = state.maxBlocks;
+    saveState();
+    buildRatingsTable();
+    buildRecommender();
+  });
+
+  slayerLvlEl.addEventListener('change', () => {
+    state.slayerLevel = Math.min(99, Math.max(1, parseInt(slayerLvlEl.value) || 99));
+    slayerLvlEl.value = state.slayerLevel;
+    saveState();
+    buildRatingsTable();
+    buildRecommender();
+  });
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Master select
+  const masterSel = document.getElementById('master-select');
+  masters.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = `${m} (${MASTER_POINTS[m] ?? '?'} pts/task)`;
+    masterSel.appendChild(opt);
+  });
+  masterSel.addEventListener('change', buildRecommender);
+
+  // Nieve diary toggle
+  const nieveEl = document.getElementById('nieve-diary-cb');
+  nieveEl.checked = state.nieveElite;
+  nieveEl.addEventListener('change', () => {
+    state.nieveElite = nieveEl.checked;
+    saveState();
+    buildRecommender();
+  });
+
+  // Search / filter
+  document.getElementById('monster-search').addEventListener('input', buildRatingsTable);
+  document.getElementById('filter-rating').addEventListener('change', buildRatingsTable);
+
+  // Reset
+  document.getElementById('reset-ratings-btn').addEventListener('click', () => {
+    if (!confirm('Reset all monster ratings to Neutral (3) and all unlocked states to checked?')) return;
+    monsters.forEach(m => { state.ratings[m.id] = 3; state.unlocked[m.id] = true; });
+    saveState();
+    buildRatingsTable();
+    buildRecommender();
+  });
+
+  buildRatingsTable();
+  buildRecommender();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
