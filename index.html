@@ -424,6 +424,12 @@ input[type="checkbox"] {
             Elite Western Diary completed (15 pts/task)
           </label>
         </div>
+        <div class="field-group" id="konar-diary-field" style="display:none; flex-direction:row; align-items:center; gap:8px; margin-top:18px;">
+          <input type="checkbox" id="konar-diary-cb" style="width:16px;height:16px;">
+          <label for="konar-diary-cb" style="font-family:'PT Serif',serif; font-size:0.85rem; color:var(--background-link-color); font-weight:700; cursor:pointer;">
+            Elite Kourend &amp; Kebos Diary completed (20 pts/task)
+          </label>
+        </div>
       </div>
 
       <!-- RECOMMENDED BLOCKS -->
@@ -618,6 +624,7 @@ const MASTER_POINTS = {
 };
 function getMasterPoints(master) {
   if (master === 'Nieve' && state.nieveElite) return 15;
+  if (master === 'Konar quo Maten' && state.konarElite) return 20;
   return MASTER_POINTS[master] ?? 0;
 }
 const SKIP_COST = 30;
@@ -660,6 +667,7 @@ let state = {
   maxBlocks: 7,
   slayerLevel: 99,
   nieveElite: false,
+  konarElite: false,
   ratings: {},
   unlocked: {},
   hardBlocks: {},
@@ -673,6 +681,7 @@ function resetState() {
   state.maxBlocks = 7;
   state.slayerLevel = 99;
   state.nieveElite = false;
+  state.konarElite = false;
   state.ratings = {};
   state.unlocked = {};
   state.hardBlocks = {};
@@ -688,6 +697,7 @@ function applyState(parsed) {
   if (parsed.maxBlocks   !== undefined) state.maxBlocks   = parsed.maxBlocks;
   if (parsed.slayerLevel !== undefined) state.slayerLevel = parsed.slayerLevel;
   if (parsed.nieveElite  !== undefined) state.nieveElite  = parsed.nieveElite;
+  if (parsed.konarElite  !== undefined) state.konarElite  = parsed.konarElite;
 }
 
 function getRating(master, monsterId) {
@@ -860,9 +870,9 @@ function buildRecommender() {
   const master = document.getElementById('master-select').value;
   if (!master) return;
 
-  // Nieve diary toggle visibility
-  const diaryField = document.getElementById('nieve-diary-field');
-  diaryField.style.display = master === 'Nieve' ? 'flex' : 'none';
+  // Diary toggle visibility
+  document.getElementById('nieve-diary-field').style.display = master === 'Nieve' ? 'flex' : 'none';
+  document.getElementById('konar-diary-field').style.display = master === 'Konar quo Maten' ? 'flex' : 'none';
 
   const N = state.maxBlocks;
   const assignable = getAssignableMonsters(master);
@@ -1066,7 +1076,7 @@ function buildSkipAnalysis(master, assignable, blockedIds) {
     <div class="dist-item"><span class="dist-label">% Hate/Dislike</span><span class="dist-val">${pct(r=>r<=2)}%</span></div>
     <div class="dist-item"><span class="dist-label">% Neutral</span><span class="dist-val">${pct(r=>r===3)}%</span></div>
     <div class="dist-item"><span class="dist-label">% Love</span><span class="dist-val">${pct(r=>r===4)}%</span></div>
-    <div class="dist-item"><span class="dist-label">Base pts/task</span><span class="dist-val">${basePoints}${master==='Nieve' ? (state.nieveElite ? ' (Elite Diary)' : ' (no diary)') : ''}</span></div>
+    <div class="dist-item"><span class="dist-label">Base pts/task</span><span class="dist-val">${basePoints}${master==='Nieve' ? (state.nieveElite ? ' (Elite Diary)' : ' (no diary)') : master==='Konar quo Maten' ? (state.konarElite ? ' (Elite Diary)' : ' (no diary)') : ''}</span></div>
   `;
   container.appendChild(distDiv);
 
@@ -1153,6 +1163,14 @@ function init() {
     buildRecommender();
   });
 
+  // Konar diary toggle
+  const konarEl = document.getElementById('konar-diary-cb');
+  konarEl.addEventListener('change', () => {
+    state.konarElite = konarEl.checked;
+    saveState();
+    buildRecommender();
+  });
+
   // Auth state — fires on page load and on every sign-in/sign-out
   auth.onAuthStateChanged(async (user) => {
     currentUser = user;
@@ -1163,6 +1181,7 @@ function init() {
     maxBlocksEl.value = state.maxBlocks;
     slayerLvlEl.value = state.slayerLevel;
     nieveEl.checked = state.nieveElite;
+    konarEl.checked = state.konarElite;
 
     // Update auth bar
     document.getElementById('btn-signin').style.display = user ? 'none' : '';
